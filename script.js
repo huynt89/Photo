@@ -111,7 +111,96 @@ btnProcess.addEventListener('click', async () => {
         return;
     }
 
-    const promptText = promptInput.value || "Hãy phân tích chi tiết vết hỏng và hư hại trên ảnh này, đưa ra giải pháp phục hồi chi tiết.";
+    
+	let promptText = promptInput.value ||
+    "Phục chế ảnh cũ một cách tự nhiên và chân thực.";
+
+const gender =
+    document.getElementById('gender-select')?.value;
+
+const optHair =
+    document.getElementById('opt-hair')?.checked;
+
+const optAsian =
+    document.getElementById('opt-asian')?.checked;
+
+const optClothes =
+    document.getElementById('opt-clothes')?.checked;
+
+
+// ======================================
+// Bổ sung yêu cầu phục chế
+// ======================================
+
+promptText += `
+
+YÊU CẦU PHỤC CHẾ:
+
+- Giữ nguyên khuôn mặt và nhận dạng của người trong ảnh.
+- Không thay đổi bố cục và tư thế nếu không được yêu cầu.
+- Khôi phục các chi tiết bị mất.
+- Làm sạch vết xước, vết bẩn và nhiễu.
+- Tăng độ rõ nét nhưng phải giữ vẻ tự nhiên.
+- Không làm khuôn mặt trở thành một người khác.
+`;
+
+
+// ======================================
+// Giới tính
+// ======================================
+
+if (gender === 'male') {
+    promptText += `
+- Chủ thể là nam.
+- Giữ các đặc điểm nam tính tự nhiên.
+`;
+}
+
+if (gender === 'female') {
+    promptText += `
+- Chủ thể là nữ.
+- Giữ các đặc điểm nữ tính tự nhiên.
+`;
+}
+
+
+// ======================================
+// Tóc
+// ======================================
+
+if (optHair) {
+    promptText += `
+- Phục hồi và vẽ lại tóc bị mất hoặc hư hỏng.
+- Tóc phải tự nhiên, phù hợp với khuôn mặt và ảnh gốc.
+`;
+}
+
+
+// ======================================
+// Người châu Á
+// ======================================
+
+if (optAsian) {
+    promptText += `
+- Chủ thể là người châu Á.
+- Ưu tiên kiểu tóc đen tự nhiên.
+- Giữ đặc điểm khuôn mặt châu Á của người trong ảnh.
+`;
+}
+
+
+// ======================================
+// Trang phục
+// ======================================
+
+if (optClothes) {
+    promptText += `
+- Phục hồi hoặc tái tạo trang phục bị hỏng.
+- Giữ kiểu dáng phù hợp với ảnh gốc.
+- Không làm thay đổi cơ thể hoặc khuôn mặt.
+`;
+}
+	
     loadingOverlay.style.display = 'flex';
 
     try {
@@ -128,13 +217,45 @@ btnProcess.addEventListener('click', async () => {
         });
 
         const data = await response.json();
-        if (!response.ok || data.error) {
-            throw new Error(data.error?.message || data.error || 'Lỗi kết nối Server API');
-        }
 
-        const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
-        resultContainer.innerHTML = `<div style="padding: 15px; color: #fff; text-align: left; overflow-y: auto; max-height: 100%; line-height: 1.6;">${resultText.replace(/\n/g, '<br>')}</div>`;
+if (!response.ok || data.error) {
+    throw new Error(
+        data.error || 'Lỗi kết nối Server API'
+    );
+}
 
+// ======================================
+// Nhận ảnh Gemini trả về
+// ======================================
+if (data.image && data.image.data) {
+
+    const mimeType =
+        data.image.mimeType || 'image/png';
+
+    const imageSrc =
+        `data:${mimeType};base64,${data.image.data}`;
+
+    resultContainer.innerHTML = `
+        <img
+            src="${imageSrc}"
+            alt="Ảnh đã phục chế"
+            style="
+                max-width: 100%;
+                max-height: 70vh;
+                object-fit: contain;
+                border-radius: 4px;
+            "
+        >
+    `;
+
+} else {
+
+    throw new Error(
+        data.text ||
+        'Gemini không trả về ảnh phục chế.'
+    );
+}
+		
     } catch (error) {
         console.error("Lỗi:", error);
         alert("Lỗi xử lý ảnh: " + error.message);
