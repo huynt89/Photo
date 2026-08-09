@@ -31,13 +31,9 @@ function initGoogleAuth() {
 
     google.accounts.id.renderButton(
         document.getElementById("google-login-btn"),
-        { 
-            theme: "filled_blue", 
-            size: "large", 
-            width: "360", 
-            text: "continue_with",
-            shape: "rectangular"
-        }
+        { theme: "outline", 
+		  size: "medium", 
+		  text: "signin_with" }
     );
 }
 
