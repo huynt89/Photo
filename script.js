@@ -48,7 +48,7 @@ btnProcess.addEventListener('click', async () => {
         return;
     }
 
-    if (API_TOKEN.includes("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")) {
+    if (API_TOKEN.includes("AQ.Ab8RN6LMOJV6N_mmNxYJWP_Q6TEhFH9a1jl594A7b-X3vVJAPQ")) {
         alert("Bạn chưa nhập mã API_TOKEN của Hugging Face vào file script.js!");
         return;
     }
