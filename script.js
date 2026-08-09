@@ -18,23 +18,46 @@ window.addEventListener('DOMContentLoaded', () => {
     initGoogleAuth();
 });
 
+let tokenClient;
+
 function initGoogleAuth() {
     if (typeof google === 'undefined' || !google.accounts) {
         setTimeout(initGoogleAuth, 500);
         return;
     }
 
-    google.accounts.id.initialize({
+    // Khởi tạo quy trình đăng nhập qua Nút tùy chỉnh
+    tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleLogin
+        scope: 'email profile',
+        callback: (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+                handleGoogleLogin();
+            }
+        }
     });
+}
 
-    google.accounts.id.renderButton(
-        document.getElementById("google-login-btn"),
-        { theme: "outline", 
-		  size: "medium", 
-		  text: "signin_with" }
-    );
+// Bắt sự kiện click cho nút Google tùy chỉnh vừa tạo
+const customBtn = document.getElementById('custom-google-btn');
+if (customBtn) {
+    customBtn.addEventListener('click', () => {
+        if (tokenClient) {
+            tokenClient.requestAccessToken();
+        } else {
+            alert("Đang tải hệ thống Google, vui lòng thử lại sau 1 giây!");
+        }
+    });
+}
+
+// Hàm này giữ nguyên như cũ
+function handleGoogleLogin() {
+    isConnected = true;
+    authStatus.className = "status-box connected";
+    authStatus.innerHTML = `🟢 Đã kết nối`;
+    btnProcess.disabled = false;
+    btnProcess.textContent = "Phục Chế Ảnh";
+    document.getElementById('custom-google-btn').style.display = 'none'; // Ẩn nút sau khi đăng nhập
 }
 
 function handleGoogleLogin(response) {
