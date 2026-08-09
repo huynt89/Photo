@@ -22,12 +22,18 @@
 
             <!-- XÁC THỰC GOOGLE -->
             <div class="auth-section">
-                <label>Xác thực tài khoản Google:</label>
-                <div id="google-login-btn"></div>
-                <div id="auth-status" class="status-box disconnected">
-                    🔴 Chưa kết nối Google
-                </div>
-            </div>
+				<label>Xác thực tài khoản Google:</label>
+    
+			<!-- Nút Google tùy chỉnh mới: Đẹp, đều và ăn khớp với giao diện -->
+				<button id="custom-google-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4285F4; background: transparent; color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: 0.2s;">
+				<img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 18px; height: 18px;">
+				Đăng nhập bằng Google
+				</button>
+    
+			<div id="auth-status" class="status-box disconnected">
+				🔴 Chưa kết nối Google
+			</div>
+		</div>
 
             <div class="form-group">
                 <label>Yêu cầu tùy chỉnh (Prompt):</label>
