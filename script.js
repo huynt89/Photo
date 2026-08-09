@@ -1,4 +1,4 @@
-const GOOGLE_CLIENT_ID = "957298442128-v4c9rc83fud515f2is92p97lojjoiuja.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "957298442128-miloqbhktrs3icl2kgj72qmuiv1q3786.apps.googleusercontent.com";
 
 const fileInput = document.getElementById('file-input');
 const originalContainer = document.getElementById('original-container');
