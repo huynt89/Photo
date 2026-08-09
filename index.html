@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phục Chế Ảnh AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <h1>Phục Chế Ảnh AI</h1>
+        <p>Thổi sức sống mới vào những bức ảnh cũ của bạn với sức mạnh của AI.</p>
+    </header>
+
+    <div class="container">
+        <!-- CỘT 1: BẢNG ĐIỀU KHIỂN -->
+        <div class="panel">
+            <div class="panel-title">Bảng Điều Khiển</div>
+
+            <div class="form-group">
+                <label>Số lượng kết quả:</label>
+                <select id="result-count">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Yêu cầu tùy chỉnh (Prompt):</label>
+                <textarea id="prompt-input" placeholder="VD: Phục chế ảnh thẻ, mặc áo sơ mi trắng, nền xanh dương"></textarea>
+            </div>
+
+            <div class="preset-title">Hoặc chọn một mẫu có sẵn:</div>
+            <div class="presets">
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Phục chế chất lượng cao, nét căng, giữ màu xám nguyên bản."> Phục chế chất lượng cao
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Phục chế chi tiết và tô màu tự nhiên cho bức ảnh cũ."> Phục chế & Tô màu
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Khôi phục ảnh hỏng nặng, vá nếp gấp, làm rõ mặt."> Tái tạo ảnh hỏng nặng
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Khử ố vàng, xóa vết phai màu, cân bằng ánh sáng."> Khử ố vàng & Phai màu
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Tập trung làm rõ đường nét khuôn mặt, mắt, mũi, miệng."> Phục chế chân dung nâng cao
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Nâng cấp độ phân giải và tô màu cho ảnh trắng đen."> Phục chế ảnh màu
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Thay đổi trang phục sang áo sơ mi trắng, Vest lịch sự."> Ghép Trang Phục
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label>Giới tính chủ thể:</label>
+                <select id="gender-select">
+                    <option value="auto">Tự động</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                </select>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-hair"> Vẽ lại tóc chi tiết
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-asian"> Người Châu Á (Tóc đen)
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-clothes" checked> Vẽ lại trang phục
+                </label>
+            </div>
+
+            <button class="btn-yellow" id="btn-outfit">GHÉP TRANG PHỤC</button>
+            <button class="btn-purple" id="btn-process">Phục Chế Ảnh</button>
+            <button class="btn-outline" id="btn-reset">Làm Lại Ảnh Mới</button>
+        </div>
+
+        <!-- CỘT 2: ẢNH GỐC -->
+        <div class="display-box">
+            <div class="box-header red">ẢNH GỐC</div>
+            <div class="image-container" id="original-container">
+                <label for="file-input" class="upload-label">
+                    ➕ Nhấp vào đây để tải ảnh cũ lên
+                </label>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+        </div>
+
+        <!-- CỘT 3: ẢNH ĐÃ PHỤC CHẾ -->
+        <div class="display-box">
+            <div class="box-header yellow">ẢNH ĐÃ PHỤC CHẾ</div>
+            <div class="image-container" id="result-container">
+                <span class="placeholder-text">Ảnh đã phục chế của bạn sẽ xuất hiện ở đây.</span>
+            </div>
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <span>AI đang tiến hành phục chế...</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
