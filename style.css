@@ -94,12 +94,6 @@ header p {
     justify-content: center;
 }
 
-#google-login-btn > div,
-#google-login-btn iframe {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
 .status-box {
     width: 100%;
     padding: 10px;
