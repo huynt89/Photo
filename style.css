@@ -8,6 +8,7 @@
     --accent-purple: #7209b7;
     --accent-purple-hover: #560bad;
     --accent-red: #e63946;
+    --accent-green: #2ec4b6;
     --border-color: #2a2a32;
 }
 
@@ -26,7 +27,6 @@ body {
     flex-direction: column;
 }
 
-/* HEADER */
 header {
     text-align: center;
     padding: 20px 10px;
@@ -45,7 +45,6 @@ header p {
     font-size: 0.9rem;
 }
 
-/* MAIN CONTAINER */
 .container {
     display: grid;
     grid-template-columns: 320px 1fr 1fr;
@@ -55,12 +54,9 @@ header p {
 }
 
 @media (max-width: 1024px) {
-    .container {
-        grid-template-columns: 1fr;
-    }
+    .container { grid-template-columns: 1fr; }
 }
 
-/* CONTROL PANEL (LEFT) */
 .panel {
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
@@ -78,8 +74,39 @@ header p {
     font-size: 1rem;
     font-weight: bold;
     text-align: center;
-    letter-spacing: 0.5px;
     text-transform: uppercase;
+}
+
+/* KHU VỰC XÁC THỰC GOOGLE */
+.auth-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--input-bg);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.status-box {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-all;
+}
+
+.status-box.disconnected {
+    background-color: rgba(230, 57, 70, 0.15);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+}
+
+.status-box.connected {
+    background-color: rgba(46, 196, 182, 0.15);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
 }
 
 .form-group {
@@ -93,7 +120,7 @@ label {
     color: var(--text-muted);
 }
 
-select, textarea, input[type="text"] {
+select, textarea, input[type="text"], input[type="password"] {
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -103,20 +130,18 @@ select, textarea, input[type="text"] {
     font-size: 0.85rem;
 }
 
-select:focus, textarea:focus {
+select:focus, textarea:focus, input:focus {
     border-color: var(--accent-gold);
 }
 
 textarea {
     resize: vertical;
-    min-height: 90px;
+    min-height: 80px;
 }
 
-/* PRESETS LIST */
 .preset-title {
     font-size: 0.8rem;
     color: var(--text-muted);
-    margin-top: 5px;
 }
 
 .presets {
@@ -134,17 +159,12 @@ textarea {
     color: #d1d1d6;
 }
 
-.preset-item input[type="radio"] {
-    accent-color: var(--accent-gold);
-    cursor: pointer;
-}
+.preset-item input[type="radio"] { accent-color: var(--accent-gold); }
 
-/* CHECKBOXES */
 .checkbox-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: 5px;
 }
 
 .checkbox-item {
@@ -155,12 +175,9 @@ textarea {
     cursor: pointer;
 }
 
-.checkbox-item input {
-    accent-color: var(--accent-purple);
-    cursor: pointer;
-}
+.checkbox-item input { accent-color: var(--accent-purple); }
 
-/* BUTTONS */
+/* NÚT BẤM */
 .btn-yellow, .btn-purple, .btn-outline {
     font-weight: bold;
     border: none;
@@ -172,38 +189,23 @@ textarea {
     text-transform: uppercase;
 }
 
-.btn-yellow {
-    background-color: var(--accent-gold);
-    color: #000;
-}
+.btn-yellow { background-color: var(--accent-gold); color: #000; }
+.btn-purple { background-color: var(--accent-purple); color: #fff; }
+.btn-purple:hover:not(:disabled) { background-color: var(--accent-purple-hover); }
 
-.btn-yellow:hover {
-    opacity: 0.9;
-}
-
-.btn-purple {
-    background-color: var(--accent-purple);
-    color: #fff;
-    text-transform: none;
-    font-size: 0.9rem;
-}
-
-.btn-purple:hover {
-    background-color: var(--accent-purple-hover);
+/* TRẠNG THÁI KHÓA NÚT KHI CHƯA KẾT NỐI */
+.btn-purple:disabled {
+    background-color: #3a3a45;
+    color: #777;
+    cursor: not-allowed;
 }
 
 .btn-outline {
     background-color: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-color);
-    text-transform: none;
 }
 
-.btn-outline:hover {
-    background-color: var(--input-bg);
-}
-
-/* IMAGE DISPLAY AREAS */
 .display-box {
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
@@ -255,24 +257,14 @@ textarea {
     width: 100%;
 }
 
-.upload-label:hover {
-    border-color: var(--accent-gold);
-    color: var(--text-color);
-}
-
+.upload-label:hover { border-color: var(--accent-gold); color: var(--text-color); }
 #file-input { display: none; }
+.placeholder-text { color: var(--text-muted); font-size: 0.85rem; text-align: center; }
 
-.placeholder-text {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-/* LOADING ANIMATION */
 .loading-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     flex-direction: column;
     align-items: center;
