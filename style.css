@@ -77,7 +77,6 @@ header p {
     text-transform: uppercase;
 }
 
-/* KHU VỰC XÁC THỰC GOOGLE */
 .auth-section {
     display: flex;
     flex-direction: column;
@@ -91,10 +90,9 @@ header p {
 .status-box {
     padding: 8px 10px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: bold;
     text-align: center;
-    word-break: break-all;
 }
 
 .status-box.disconnected {
@@ -120,7 +118,7 @@ label {
     color: var(--text-muted);
 }
 
-select, textarea, input[type="text"], input[type="password"] {
+select, textarea, input {
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -177,7 +175,6 @@ textarea {
 
 .checkbox-item input { accent-color: var(--accent-purple); }
 
-/* NÚT BẤM */
 .btn-yellow, .btn-purple, .btn-outline {
     font-weight: bold;
     border: none;
@@ -193,7 +190,6 @@ textarea {
 .btn-purple { background-color: var(--accent-purple); color: #fff; }
 .btn-purple:hover:not(:disabled) { background-color: var(--accent-purple-hover); }
 
-/* TRẠNG THÁI KHÓA NÚT KHI CHƯA KẾT NỐI */
 .btn-purple:disabled {
     background-color: #3a3a45;
     color: #777;

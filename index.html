@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phục Chế Ảnh AI TIẾN ADOBE</title>
+    <title>Phục chế ảnh AI</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Thư viện Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="script.js" defer></script>
 </head>
 <body>
 
     <header>
-        <h1>Phục Chế Ảnh AI TIẾN ADOBE</h1>
+        <h1>Phục chế ảnh AI</h1>
         <p>Thổi sức sống mới vào những bức ảnh cũ của bạn với sức mạnh của AI.</p>
     </header>
 
@@ -21,19 +20,13 @@
         <div class="panel">
             <div class="panel-title">Bảng Điều Khiển</div>
 
-            <!-- KHU VỰC ĐĂNG NHẬP GOOGLE & TRẠNG THÁI -->
+            <!-- XÁC THỰC GOOGLE -->
             <div class="auth-section">
                 <label>Xác thực tài khoản Google:</label>
                 <div id="google-login-btn"></div>
                 <div id="auth-status" class="status-box disconnected">
                     🔴 Chưa kết nối Google
                 </div>
-            </div>
-
-            <!-- GEMINI API KEY -->
-            <div class="form-group">
-                <label for="api-key-input">Gemini API Key:</label>
-                <input type="password" id="api-key-input" placeholder="Dán Gemini API Key (AIzaSy...)">
             </div>
 
             <div class="form-group">
@@ -85,8 +78,6 @@
             </div>
 
             <button class="btn-yellow" id="btn-outfit">GHÉP TRANG PHỤC</button>
-            
-            <!-- NÚT XỬ LÝ SẼ BỊ KHÓA KHI CHƯA ĐĂNG NHẬP -->
             <button class="btn-purple" id="btn-process" disabled>Phục Chế Ảnh (Cần Kết Nối)</button>
             <button class="btn-outline" id="btn-reset">Làm Lại Ảnh Mới</button>
         </div>
