@@ -94,7 +94,7 @@ btnProcess.addEventListener('click', async () => {
         const base64Data = await fileToBase64(selectedFile);
 
         // Gửi dữ liệu tới API trung gian Vercel
-        const response = await fetch('/api/process', {
+        const response = await fetch('https://photo-one-pi.vercel.app/api/process', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
