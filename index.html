@@ -3,76 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phục Chế Ảnh AI</title>
+    <title>Phục chế ảnh AI</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Load thư viện Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
+
+    <header>
+        <h1>Phục chế ảnh AI</h1>
+        <p>Thổi sức sống mới vào những bức ảnh cũ của bạn với sức mạnh của AI.</p>
+    </header>
+
     <div class="container">
-        <!-- Cột 1: Bảng điều khiển & Chọn ảnh -->
-        <div class="panel control-panel">
-            <h3 class="panel-title">BẢNG ĐIỀU KHIỂN</h3>
-            
-            <!-- Đăng nhập Google chuẩn -->
+        <!-- CỘT 1: BẢNG ĐIỀU KHIỂN -->
+        <div class="panel">
+            <div class="panel-title">Bảng Điều Khiển</div>
+
+            <!-- XÁC THỰC GOOGLE -->
             <div class="auth-section">
-                <label>Xác thực tài khoản Google:</label>
-                <div id="buttonDiv"></div>
-                <div id="auth-status" class="status-box disconnected" style="margin-top: 10px;">
-                    🔴 Chưa kết nối Google
-                </div>
-            </div>
+				<label>Xác thực tài khoản Google:</label>
+    
+			<!-- Nút Google tùy chỉnh mới: Đẹp, đều và ăn khớp với giao diện -->
+				<button id="custom-google-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4285F4; background: transparent; color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: 0.2s;">
+				<img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 18px; height: 18px;">
+				Đăng nhập bằng Google
+				</button>
+    
+			<div id="auth-status" class="status-box disconnected">
+				🔴 Chưa kết nối Google
+			</div>
+	</div>
 
-            <!-- Nút chọn ảnh chuyển vào cột điều khiển -->
-            <div class="upload-section">
-                <label>Chọn ảnh gốc cần phục chế:</label>
-                <input type="file" id="image-upload" accept="image/*">
-            </div>
-
-            <!-- Tùy chỉnh Prompt -->
-            <div class="prompt-section">
+            <div class="form-group">
                 <label>Yêu cầu tùy chỉnh (Prompt):</label>
-                <textarea id="prompt-input" placeholder="Phục chế chất lượng cao, nét căng, giữ màu xám nguyên bản..."></textarea>
+                <textarea id="prompt-input" placeholder="VD: Phục chế ảnh thẻ, mặc áo sơ mi trắng, nền xanh dương"></textarea>
             </div>
 
-            <!-- Các mẫu có sẵn -->
-            <div class="preset-section">
-                <label>Hoặc chọn một mẫu có sẵn:</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="preset" value="Phục chế chất lượng cao" checked> Phục chế chất lượng cao</label>
-                    <label><input type="radio" name="preset" value="Phục chế & Tô màu"> Phục chế & Tô màu</label>
-                    <label><input type="radio" name="preset" value="Tái tạo ảnh hỏng nặng"> Tái tạo ảnh hỏng nặng</label>
-                    <label><input type="radio" name="preset" value="Khử ố vàng & Phai màu"> Khử ố vàng & Phai màu</label>
-                    <label><input type="radio" name="preset" value="Phục chế chân dung nâng cao"> Phục chế chân dung nâng cao</label>
-                    <label><input type="radio" name="preset" value="Ghép Trang Phục"> Ghép Trang Phục</label>
-                </div>
+            <div class="preset-title">Hoặc chọn một mẫu có sẵn:</div>
+            <div class="presets">
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Phục chế chất lượng cao, nét căng, giữ màu xám nguyên bản."> Phục chế chất lượng cao
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Phục chế chi tiết và tô màu tự nhiên cho bức ảnh cũ."> Phục chế & Tô màu
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Khôi phục ảnh hỏng nặng, vá nếp gấp, làm rõ mặt."> Tái tạo ảnh hỏng nặng
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Khử ố vàng, xóa vết phai màu, cân bằng ánh sáng."> Khử ố vàng & Phai màu
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Tập trung làm rõ đường nét khuôn mặt, mắt, mũi, miệng."> Phục chế chân dung nâng cao
+                </label>
+                <label class="preset-item">
+                    <input type="radio" name="preset" value="Thay đổi trang phục sang áo sơ mi trắng, Vest lịch sự."> Ghép Trang Phục
+                </label>
             </div>
 
-            <!-- Nút Bắt đầu xử lý -->
-            <div class="action-section">
-                <button id="btn-process" disabled>Vui lòng đăng nhập để bắt đầu</button>
+            <div class="form-group" style="margin-top: 10px;">
+                <label>Giới tính chủ thể:</label>
+                <select id="gender-select">
+                    <option value="auto">Tự động</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                </select>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-hair"> Vẽ lại tóc chi tiết
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-asian"> Người Châu Á (Tóc đen)
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="opt-clothes" checked> Vẽ lại trang phục
+                </label>
+            </div>
+
+            <button class="btn-yellow" id="btn-outfit">GHÉP TRANG PHỤC</button>
+            <button class="btn-purple" id="btn-process" disabled>Phục Chế Ảnh (Cần Kết Nối)</button>
+            <button class="btn-outline" id="btn-reset">Làm Lại Ảnh Mới</button>
+        </div>
+
+        <!-- CỘT 2: ẢNH GỐC -->
+        <div class="display-box">
+            <div class="box-header red">ẢNH GỐC</div>
+            <div class="image-container" id="original-container">
+                <label for="file-input" class="upload-label">
+                    ➕ Nhấp vào đây để tải ảnh cũ lên
+                </label>
+                <input type="file" id="file-input" accept="image/*">
             </div>
         </div>
 
-        <!-- Cột 2: Ảnh gốc to rõ nằm chính giữa -->
-        <div class="panel image-panel">
-            <h3 class="panel-title red-title">ẢNH GỐC</h3>
-            <div class="image-container">
-                <span id="placeholder-text" style="color: #666; font-size: 0.9rem;">Chưa có ảnh tải lên</span>
-                <img id="original-image" src="" alt="Ảnh gốc" style="display: none;">
+        <!-- CỘT 3: ẢNH ĐÃ PHỤC CHẾ -->
+        <div class="display-box">
+            <div class="box-header yellow">ẢNH ĐÃ PHỤC CHẾ</div>
+            <div class="image-container" id="result-container">
+                <span class="placeholder-text">Vui lòng đăng nhập Google và tải ảnh lên để bắt đầu.</span>
             </div>
-        </div>
-
-        <!-- Cột 3: Ảnh đã phục chế -->
-        <div class="panel image-panel">
-            <h3 class="panel-title yellow-title">ẢNH ĐÃ PHỤC CHẾ</h3>
-            <div class="image-container">
-                <div id="loading-spinner" style="display: none;">AI đang tiến hành phục chế...</div>
-                <div id="result-content"></div>
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <span>AI đang tiến hành phục chế...</span>
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
