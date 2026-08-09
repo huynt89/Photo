@@ -14,12 +14,11 @@ const presets = document.querySelectorAll('input[name="preset"]');
 
 let selectedFile = null;
 let isConnected = false;
+let tokenClient;
 
 window.addEventListener('DOMContentLoaded', () => {
     initGoogleAuth();
 });
-
-let tokenClient;
 
 function initGoogleAuth() {
     if (typeof google === 'undefined' || !google.accounts) {
@@ -27,7 +26,6 @@ function initGoogleAuth() {
         return;
     }
 
-    // Khởi tạo quy trình đăng nhập qua Nút tùy chỉnh
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: 'email profile',
@@ -39,7 +37,6 @@ function initGoogleAuth() {
     });
 }
 
-// Bắt sự kiện click cho nút Google tùy chỉnh vừa tạo
 const customBtn = document.getElementById('custom-google-btn');
 if (customBtn) {
     customBtn.addEventListener('click', () => {
@@ -51,25 +48,15 @@ if (customBtn) {
     });
 }
 
-// Hàm này giữ nguyên như cũ
 function handleGoogleLogin() {
     isConnected = true;
     authStatus.className = "status-box connected";
     authStatus.innerHTML = `🟢 Đã kết nối`;
     btnProcess.disabled = false;
     btnProcess.textContent = "Phục Chế Ảnh";
-    document.getElementById('custom-google-btn').style.display = 'none'; // Ẩn nút sau khi đăng nhập
-}
-
-function handleGoogleLogin(response) {
-    isConnected = true;
-
-    // Cập nhật trạng thái chỉ hiển thị: 🟢 Đã kết nối
-    authStatus.className = "status-box connected";
-    authStatus.innerHTML = `🟢 Đã kết nối`;
-
-    btnProcess.disabled = false;
-    btnProcess.textContent = "Phục Chế Ảnh";
+    
+    const btn = document.getElementById('custom-google-btn');
+    if (btn) btn.style.display = 'none'; // Ẩn nút sau khi đăng nhập thành công
 }
 
 function fileToBase64(file, maxWidth = 1024) {
@@ -130,7 +117,6 @@ btnProcess.addEventListener('click', async () => {
     try {
         const base64Data = await fileToBase64(selectedFile);
 
-        // Gửi dữ liệu tới API trung gian Vercel
         const response = await fetch(VERCEL_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -142,9 +128,11 @@ btnProcess.addEventListener('click', async () => {
         });
 
         const data = await response.json();
-        if (data.error) throw new Error(data.error.message || data.error);
+        if (!response.ok || data.error) {
+            throw new Error(data.error?.message || data.error || 'Lỗi kết nối Server API');
+        }
 
-        const resultText = data.candidates[0].content.parts[0].text;
+        const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
         resultContainer.innerHTML = `<div style="padding: 15px; color: #fff; text-align: left; overflow-y: auto; max-height: 100%; line-height: 1.6;">${resultText.replace(/\n/g, '<br>')}</div>`;
 
     } catch (error) {

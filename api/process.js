@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         // Kiểm tra nếu bị chặn do lý do khác
         const candidate = data.candidates?.[0];
         if (candidate?.finishReason && candidate.finishReason !== "STOP") {
-            return.status(200).json({ 
+            return res.status(200).json({ 
                 candidates: [{ 
                     content: { 
                         parts: [{ text: `AI đã từ chối xử lý ảnh này do quy tắc an toàn (Lý do: ${candidate.finishReason}). Hãy thử đổi sang ảnh khác hoặc sửa lại Prompt.` }] 
