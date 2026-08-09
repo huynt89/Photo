@@ -10,12 +10,22 @@ const presets = document.querySelectorAll('input[name="preset"]');
 
 let selectedFile = null;
 
-// LƯU Ý QUAN TRỌNG: 
-// Điền API Token từ tài khoản Hugging Face của bạn vào đây
-// Đăng ký miễn phí tại: https://huggingface.co/settings/tokens
-const API_TOKEN = "hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+// =========================================================
+// 1. CHÈN GEMINI API KEY CỦA BẠN VÀO DÒNG DƯỚI ĐÂY
+// =========================================================
+const GEMINI_API_KEY = "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
-// 1. Xử lý Upload Ảnh và hiển thị xem trước
+// Hàm hỗ trợ chuyển file ảnh sang chuỗi Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Xử lý Upload Ảnh và hiển thị xem trước
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -28,74 +38,83 @@ fileInput.addEventListener('change', (e) => {
     }
 });
 
-// 2. Tự động điền Prompt khi người dùng chọn mẫu có sẵn
+// Tự động điền Prompt khi chọn mẫu có sẵn
 presets.forEach(radio => {
     radio.addEventListener('change', (e) => {
         promptInput.value = e.target.value;
     });
 });
 
-// Nút tắt ghép trang phục nhanh
+// Nút ghép trang phục nhanh
 btnOutfit.addEventListener('click', () => {
     promptInput.value = "Giữ nguyên khuôn mặt, thay đổi trang phục sang áo sơ mi trắng phẳng phiu, lịch sự.";
     document.getElementById('opt-clothes').checked = true;
 });
 
-// 3. Gửi Ảnh + Prompt lên Model AI (Image-to-Image) để xử lý
+// =========================================================
+// 2. GỬI ẢNH + PROMPT LÊN GEMINI API ĐỂ XỬ LÝ
+// =========================================================
 btnProcess.addEventListener('click', async () => {
     if (!selectedFile) {
         alert("Vui lòng tải ảnh gốc cần phục hồi lên trước!");
         return;
     }
 
-    if (API_TOKEN.includes("AQ.Ab8RN6LMOJV6N_mmNxYJWP_Q6TEhFH9a1jl594A7b-X3vVJAPQ")) {
-        alert("Bạn chưa nhập mã API_TOKEN của Hugging Face vào file script.js!");
+    if (GEMINI_API_KEY.includes("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")) {
+        alert("Bạn chưa dán Gemini API Key vào file script.js!");
         return;
     }
 
+    const promptText = promptInput.value || "Hãy phân tích chi tiết vết hỏng và hư hại trên ảnh này, đưa ra giải pháp phục hồi chi tiết.";
     loadingOverlay.style.display = 'flex';
 
     try {
-        // Chuyển file ảnh thành mảng dữ liệu nhị phân (Buffer) để gửi qua API
-        const arrayBuffer = await selectedFile.arrayBuffer();
+        // Chuyển ảnh sang định dạng Base64
+        const base64Data = await fileToBase64(selectedFile);
 
-        // Gọi Model GFPGAN chuyên dụng để phục hồi khuôn mặt và hình ảnh cũ
+        // Gọi REST API trực tiếp của Google Gemini (Mô hình Gemini Flash)
         const response = await fetch(
-            "https://api-inference.huggingface.co/models/tencentarc/gfpgan",
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
             {
-                headers: {
-                    Authorization: `Bearer ${API_TOKEN}`,
-                    "Content-Type": "application/octet-stream",
-                },
-                method: "POST",
-                body: arrayBuffer,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: promptText },
+                            {
+                                inline_data: {
+                                    mime_type: selectedFile.type,
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }]
+                })
             }
         );
 
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || "Lỗi khi kết nối tới máy chủ AI.");
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error.message);
         }
 
-        // Nhận kết quả trả về là một file ảnh nhị phân (Blob)
-        const imageBlob = await response.blob();
-        
-        // Chuyển Blob thành URL để hiển thị lên thẻ <img>
-        const restoredImageUrl = URL.createObjectURL(imageBlob);
+        // Lấy kết quả phản hồi từ Gemini
+        const resultText = data.candidates[0].content.parts[0].text;
 
-        // Render ảnh đã phục chế ra giao diện
-        resultContainer.innerHTML = `<img src="${restoredImageUrl}" alt="Ảnh đã phục chế">`;
+        // Hiển thị nội dung phản hồi của Gemini lên khung bên phải
+        resultContainer.innerHTML = `<div style="padding: 15px; color: #fff; text-align: left; overflow-y: auto; max-height: 100%; line-height: 1.6;">${resultText.replace(/\n/g, '<br>')}</div>`;
 
     } catch (error) {
         console.error("Chi tiết lỗi:", error);
-        alert("Lỗi quá trình phục hồi: " + error.message);
+        alert("Lỗi Gemini API: " + error.message);
     } finally {
-        // Tắt vòng xoay loading
         loadingOverlay.style.display = 'none';
     }
 });
 
-// 4. Khôi phục lại trạng thái ban đầu của giao diện
+// Nút Làm lại
 btnReset.addEventListener('click', () => {
     fileInput.value = '';
     selectedFile = null;
