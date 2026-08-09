@@ -1,14 +1,18 @@
 
 // ================= CẤU HÌNH =================
 const GOOGLE_CLIENT_ID = "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com"; 
-const VERCEL_API_URL = 'https://photo-one-pi.vercel.app/api/process'; // Link API Vercel của bạn
+const VERCEL_API_URL = 'https://photo-one-pi.vercel.app//api/process'; // Link API Vercel của bạn
+
+// ================= CẤU HÌNH =================
+const GOOGLE_CLIENT_ID = 'ĐIỀN_CLIENT_ID_CỦA_BẠN_VÀO_ĐÂY.apps.googleusercontent.com'; 
+const VERCEL_API_URL = 'https://TEN-APP-CUA-BAN.vercel.app/api/process'; 
 
 // ================= DOM ELEMENTS =================
 const authStatus = document.getElementById('auth-status');
-const customGoogleBtn = document.getElementById('custom-google-btn');
 const btnProcess = document.getElementById('btn-process');
 const imageUpload = document.getElementById('image-upload');
 const originalImage = document.getElementById('original-image');
+const placeholderText = document.getElementById('placeholder-text');
 const promptInput = document.getElementById('prompt-input');
 const presetRadios = document.querySelectorAll('input[name="preset"]');
 const loadingSpinner = document.getElementById('loading-spinner');
@@ -17,7 +21,6 @@ const resultContent = document.getElementById('result-content');
 let isConnected = false;
 let base64Image = "";
 let mimeType = "";
-let tokenClient;
 
 // ================= GOOGLE AUTH =================
 window.onload = function() {
@@ -30,51 +33,39 @@ function initGoogleAuth() {
         return;
     }
 
-    // Dùng initTokenClient thay thế cho iframe cũ
-    tokenClient = google.accounts.oauth2.initTokenClient({
+    google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        scope: 'email profile',
-        callback: (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-                handleGoogleLogin();
-            }
-        }
+        callback: handleCredentialResponse
     });
+
+    google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large", width: "100%" } 
+    );
 }
 
-if (customGoogleBtn) {
-    customGoogleBtn.addEventListener('click', () => {
-        if (tokenClient) {
-            tokenClient.requestAccessToken();
+function handleCredentialResponse(response) {
+    if (response && response.credential) {
+        isConnected = true;
+        authStatus.className = "status-box connected";
+        authStatus.innerHTML = `🟢 Đã kết nối Google`;
+        
+        if (base64Image) {
+            btnProcess.disabled = false;
+            btnProcess.textContent = "Bắt đầu phục chế";
         } else {
-            alert("Đang tải hệ thống Google, vui lòng thử lại sau 1 giây!");
+            btnProcess.textContent = "Vui lòng chọn ảnh";
         }
-    });
-}
-
-function handleGoogleLogin() {
-    isConnected = true;
-    authStatus.className = "status-box connected";
-    authStatus.innerHTML = `🟢 Đã kết nối`;
-    customGoogleBtn.style.display = 'none'; // Ẩn nút sau khi kết nối
-    
-    if (base64Image) {
-        btnProcess.disabled = false;
-        btnProcess.textContent = "Bắt đầu phục chế";
-    } else {
-        btnProcess.textContent = "Vui lòng chọn ảnh";
     }
 }
 
 // ================= XỬ LÝ ẢNH & GIAO DIỆN =================
-// Chọn Radio Box -> Đưa text vào Textarea
 presetRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {
         promptInput.value = e.target.value;
     });
 });
 
-// Upload Ảnh
 imageUpload.addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -83,21 +74,23 @@ imageUpload.addEventListener('change', function(event) {
     const reader = new FileReader();
 
     reader.onload = function(e) {
+        // Hiển thị ảnh vào Cột 2
         originalImage.src = e.target.result;
         originalImage.style.display = "block";
+        placeholderText.style.display = "none";
         
-        // Cắt bỏ phần header data:image/...;base64, để lấy chuỗi raw base64
         base64Image = e.target.result.split(',')[1]; 
 
         if (isConnected) {
             btnProcess.disabled = false;
             btnProcess.textContent = "Bắt đầu phục chế";
+        } else {
+            btnProcess.textContent = "Vui lòng đăng nhập để bắt đầu";
         }
     };
     reader.readAsDataURL(file);
 });
 
-// Gọi API Xử lý
 btnProcess.addEventListener('click', async () => {
     const finalPrompt = promptInput.value || document.querySelector('input[name="preset"]:checked').value;
 
@@ -127,7 +120,6 @@ btnProcess.addEventListener('click', async () => {
             throw new Error(data.error || 'Có lỗi xảy ra trong quá trình xử lý.');
         }
 
-        // Tùy theo cấu trúc trả về của Gemini để hiển thị (Gemini text model thường trả về text mô tả)
         const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "Đã xử lý xong (Không có dữ liệu văn bản trả về).";
         resultContent.innerHTML = `<p style="padding: 15px;">${textResult.replace(/\n/g, '<br>')}</p>`;
 

@@ -10,20 +10,23 @@
 </head>
 <body>
     <div class="container">
-        <!-- Cột 1: Bảng điều khiển -->
+        <!-- Cột 1: Bảng điều khiển & Chọn ảnh -->
         <div class="panel control-panel">
             <h3 class="panel-title">BẢNG ĐIỀU KHIỂN</h3>
             
-            <!-- Khu vực đăng nhập -->
+            <!-- Đăng nhập Google chuẩn -->
             <div class="auth-section">
                 <label>Xác thực tài khoản Google:</label>
-                <button id="custom-google-btn" class="custom-google-btn">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
-                    Đăng nhập bằng Google
-                </button>
-                <div id="auth-status" class="status-box disconnected">
-                    🔴 Chưa kết nối
+                <div id="buttonDiv"></div>
+                <div id="auth-status" class="status-box disconnected" style="margin-top: 10px;">
+                    🔴 Chưa kết nối Google
                 </div>
+            </div>
+
+            <!-- Nút chọn ảnh chuyển vào cột điều khiển -->
+            <div class="upload-section">
+                <label>Chọn ảnh gốc cần phục chế:</label>
+                <input type="file" id="image-upload" accept="image/*">
             </div>
 
             <!-- Tùy chỉnh Prompt -->
@@ -45,18 +48,18 @@
                 </div>
             </div>
 
-            <!-- Nút Upload & Xử lý -->
+            <!-- Nút Bắt đầu xử lý -->
             <div class="action-section">
-                <input type="file" id="image-upload" accept="image/*">
                 <button id="btn-process" disabled>Vui lòng đăng nhập để bắt đầu</button>
             </div>
         </div>
 
-        <!-- Cột 2: Ảnh gốc -->
+        <!-- Cột 2: Ảnh gốc to rõ nằm chính giữa -->
         <div class="panel image-panel">
             <h3 class="panel-title red-title">ẢNH GỐC</h3>
             <div class="image-container">
-                <img id="original-image" src="" alt="Chưa có ảnh tải lên" style="display: none;">
+                <span id="placeholder-text" style="color: #666; font-size: 0.9rem;">Chưa có ảnh tải lên</span>
+                <img id="original-image" src="" alt="Ảnh gốc" style="display: none;">
             </div>
         </div>
 
