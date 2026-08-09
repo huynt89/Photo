@@ -32,10 +32,10 @@ function initGoogleAuth() {
     google.accounts.id.renderButton(
         document.getElementById("google-login-btn"),
         { 
-            theme: "filled_blue", 
+            theme: "outline", 
             size: "large", 
-            width: "280", 
-            text: "continue_with",
+            width: "320", 
+            text: "signin_with",
             shape: "rectangular"
         }
     );
