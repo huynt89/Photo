@@ -46,12 +46,23 @@ function handleGoogleLogin(response) {
     btnProcess.textContent = "Phục Chế Ảnh";
 }
 
-function fileToBase64(file) {
+function fileToBase64(file, maxWidth = 1024) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = error => reject(error);
+        const image = new Image();
+        image.src = URL.createObjectURL(file);
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            let scale = Math.min(maxWidth / image.width, 1);
+            canvas.width = image.width * scale;
+            canvas.height = image.height * scale;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            
+            const base64 = canvas.toDataURL(file.type, 0.85).split(',')[1];
+            resolve(base64);
+        };
+        image.onerror = error => reject(error);
     });
 }
 
