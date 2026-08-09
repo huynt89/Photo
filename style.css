@@ -80,15 +80,23 @@ header p {
 .auth-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     background: var(--input-bg);
-    padding: 10px;
+    padding: 12px;
     border-radius: 6px;
     border: 1px solid var(--border-color);
 }
 
+#google-login-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .status-box {
-    padding: 8px 10px;
+    width: 100%;
+    padding: 10px;
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: bold;
