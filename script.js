@@ -3,7 +3,7 @@
 // =========================================================
 // Bạn tạo OAuth 2.0 Client ID trên https://console.cloud.google.com/
 // Thêm domain GitHub Pages của bạn vào mục "Authorized JavaScript origins"
-const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "957298442128-v4c9rc83fud515f2is92p97lojjoiuja.apps.googleusercontent.com";
 
 const fileInput = document.getElementById('file-input');
 const originalContainer = document.getElementById('original-container');
