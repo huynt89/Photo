@@ -1,3 +1,6 @@
+// ⚠️ THAY BẰNG CLIENT ID THẬT CỦA BẠN Ở ĐÂY
+const GOOGLE_CLIENT_ID = "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com";
+
 document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let isLoggedIn = false;
@@ -16,22 +19,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReset = document.getElementById('btn-reset');
     const btnDownload = document.getElementById('btn-download');
 
-    // 1. Giả lập Đăng nhập Google
-    if (customGoogleBtn) {
-        customGoogleBtn.addEventListener('click', () => {
+    // ==========================================
+    // 1. TÍCH HỢP GOOGLE SIGN-IN THẬT
+    // ==========================================
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function handleCredentialResponse(response) {
+        const user = parseJwt(response.credential);
+        if (user) {
             isLoggedIn = true;
             authStatus.className = "status-box connected";
-            authStatus.innerHTML = `🟢 Đã kết nối: Người dùng Google`;
+            authStatus.innerHTML = `🟢 ${user.name} (${user.email})`;
             customGoogleBtn.style.display = "none";
 
             if (selectedFile) {
                 btnProcess.disabled = false;
                 btnProcess.innerText = "Phục Chế Ảnh Ngay";
             }
+        }
+    }
+
+    // Khởi tạo thư viện Google Auth
+    if (window.google) {
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
         });
     }
 
-    // 2. Tải và xem trước ảnh
+    // Sự kiện khi bấm nút Đăng nhập -> Mở popup Google chọn tài khoản
+    if (customGoogleBtn) {
+        customGoogleBtn.addEventListener('click', () => {
+            if (window.google) {
+                google.accounts.id.prompt(); // Hiện bảng chọn tài khoản Google
+            } else {
+                alert("Đang tải dịch vụ Google, vui lòng thử lại sau vài giây!");
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. TẢI VÀ XEM TRƯỚC ẢNH
+    // ==========================================
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -53,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Convert file ảnh sang dạng Base64
     const fileToBase64 = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -61,7 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onerror = (error) => reject(error);
     });
 
-    // 3. Hàm gọi AI xử lý ảnh (Dùng REST API qua CORS Proxy)
+    // ==========================================
+    // 3. XỬ LÝ GỌI AI
+    // ==========================================
     async function processImage() {
         if (!selectedFile) {
             alert("Vui lòng chọn ảnh!");
@@ -69,34 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         loadingOverlay.style.display = 'flex';
-        loadingText.innerText = "⏳ Đang kết nối AI (Server có thể mất 30s để khởi động)...";
+        loadingText.innerText = "⏳ Đang kết nối AI (Máy chủ mất khoảng 20s để xử lý)...";
 
         try {
             const base64Image = await fileToBase64(selectedFile);
-            
-            // Endpoint chính thức của CodeFormer Space
             const targetUrl = "https://sczhou-codeformer.hf.space/api/predict";
-            // Dùng CORS Proxy để vượt rào cản trình duyệt trên GitHub Pages
             const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
             const response = await fetch(proxyUrl, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    data: [
-                        base64Image, // Ảnh gốc
-                        true,        // background_enhance
-                        true,        // face_upsample
-                        2,           // upscale 2x
-                        0.5          // fidelity
-                    ]
+                    data: [base64Image, true, true, 2, 0.5]
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`Server báo lỗi HTTP: ${response.status}. Có thể máy chủ AI đang bận, vui lòng thử lại sau 30 giây.`);
+                throw new Error(`Lỗi HTTP: ${response.status}`);
             }
 
             const data = await response.json();
@@ -116,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (err) {
-            console.error("Lỗi chi tiết:", err);
+            console.error("Lỗi:", err);
             alert("❌ Lỗi phục chế: " + err.message);
         } finally {
             loadingOverlay.style.display = 'none';
@@ -126,7 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnProcess) btnProcess.addEventListener('click', processImage);
     if (btnOutfit) btnOutfit.addEventListener('click', processImage);
 
-    // 4. Nút Reset
+    // ==========================================
+    // 4. RESET
+    // ==========================================
     if (btnReset) {
         btnReset.addEventListener('click', () => {
             selectedFile = null;
