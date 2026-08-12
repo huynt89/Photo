@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedFile) enableButtons();
     }
 
-    if (window.google && GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com") {
+    if (window.google && GOOGLE_CLIENT_ID !== "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com") {
         google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
     }
 
