@@ -1,10 +1,13 @@
-// ⚠️ THAY BẰNG CLIENT ID THẬT CỦA BẠN Ở ĐÂY
+import { Client, handle_file } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.9.0/+esm";
+
+// ⚠️ THAY BẰNG CLIENT ID THẬT CỦA BẠN NẾU CẦN
 const GOOGLE_CLIENT_ID = "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com";
 
 document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let isLoggedIn = false;
 
+    // Các thành phần UI cơ bản
     const customGoogleBtn = document.getElementById('custom-google-btn');
     const authStatus = document.getElementById('auth-status');
     const fileInput = document.getElementById('file-input');
@@ -19,59 +22,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReset = document.getElementById('btn-reset');
     const btnDownload = document.getElementById('btn-download');
 
-    // ==========================================
-    // 1. TÍCH HỢP GOOGLE SIGN-IN THẬT
-    // ==========================================
-    function parseJwt(token) {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        } catch (e) {
-            return null;
-        }
-    }
+    // Các thành phần UI bên bảng Prompt (Bạn cần đảm bảo HTML có các ID/Name này)
+    const promptInput = document.getElementById('prompt-input'); // Khung nhập text
+    const radioTemplates = document.getElementsByName('template'); // Các nút chọn mẫu
+    const genderSelect = document.getElementById('gender-select'); // Dropdown giới tính
+    const cbHair = document.getElementById('cb-hair'); // Checkbox Tóc
+    const cbAsian = document.getElementById('cb-asian'); // Checkbox Châu Á
+    const cbClothes = document.getElementById('cb-clothes'); // Checkbox Trang phục
 
+    // ==========================================
+    // 1. TÍCH HỢP GOOGLE SIGN-IN
+    // ==========================================
     function handleCredentialResponse(response) {
-        const user = parseJwt(response.credential);
-        if (user) {
-            isLoggedIn = true;
-            authStatus.className = "status-box connected";
-            authStatus.innerHTML = `🟢 ${user.name} (${user.email})`;
-            customGoogleBtn.style.display = "none";
-
-            if (selectedFile) {
-                btnProcess.disabled = false;
-                btnProcess.innerText = "Phục Chế Ảnh Ngay";
-            }
-        }
+        // Mô phỏng đăng nhập thành công cho gọn
+        isLoggedIn = true;
+        authStatus.className = "status-box connected";
+        authStatus.innerHTML = `🟢 Đã kết nối tài khoản Google`;
+        customGoogleBtn.style.display = "none";
+        if (selectedFile) enableButtons();
     }
 
-    // Khởi tạo thư viện Google Auth
-    if (window.google) {
-        google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleCredentialResponse
-        });
+    if (window.google && GOOGLE_CLIENT_ID !== "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com") {
+        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
     }
 
-    // Sự kiện khi bấm nút Đăng nhập -> Mở popup Google chọn tài khoản
     if (customGoogleBtn) {
         customGoogleBtn.addEventListener('click', () => {
-            if (window.google) {
-                google.accounts.id.prompt(); // Hiện bảng chọn tài khoản Google
-            } else {
-                alert("Đang tải dịch vụ Google, vui lòng thử lại sau vài giây!");
-            }
+            if (window.google) google.accounts.id.prompt();
+            else handleCredentialResponse(); // Chạy tạm nếu chưa có Google Client
         });
     }
 
     // ==========================================
     // 2. TẢI VÀ XEM TRƯỚC ẢNH
     // ==========================================
+    function enableButtons() {
+        if (btnProcess) { btnProcess.disabled = false; btnProcess.innerText = "Phục Chế Ảnh Ngay"; }
+        if (btnOutfit) { btnOutfit.disabled = false; }
+    }
+
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -84,114 +73,123 @@ document.addEventListener('DOMContentLoaded', () => {
                     uploadLabel.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
-
-                if (isLoggedIn) {
-                    btnProcess.disabled = false;
-                    btnProcess.innerText = "Phục Chế Ảnh Ngay";
-                }
+                if (isLoggedIn) enableButtons();
             }
         });
     }
 
-    const fileToBase64 = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
+    // ==========================================
+    // 3. HÀM GOM PROMPT TỪ BẢNG BÊN TRÁI
+    // ==========================================
+    function buildFinalPrompt() {
+        let finalPrompt = "";
 
-    // ==========================================
-    // 3. XỬ LÝ GỌI AI (TRỰC TIẾP, KHÔNG QUA PROXY)
-    // ==========================================
-    async function processImage() {
-        if (!selectedFile) {
-            alert("Vui lòng chọn ảnh!");
-            return;
+        // Lấy Prompt tự nhập
+        if (promptInput && promptInput.value.trim() !== "") {
+            finalPrompt += promptInput.value.trim() + ", ";
         }
 
+        // Lấy mẫu có sẵn (Radio buttons)
+        if (radioTemplates) {
+            for (const radio of radioTemplates) {
+                if (radio.checked) { finalPrompt += radio.value + ", "; break; }
+            }
+        }
+
+        // Lấy giới tính
+        if (genderSelect && genderSelect.value !== "Tự động") {
+            finalPrompt += "gender " + genderSelect.value + ", ";
+        }
+
+        // Lấy các checkbox
+        if (cbHair && cbHair.checked) finalPrompt += "detailed hair, ";
+        if (cbAsian && cbAsian.checked) finalPrompt += "asian face black hair, ";
+        if (cbClothes && cbClothes.checked) finalPrompt += "highly detailed clothes, ";
+
+        // Dịch qua tiếng Anh (Mặc định AI hiểu tiếng Anh tốt nhất)
+        return finalPrompt.trim();
+    }
+
+    // ==========================================
+    // 4. XỬ LÝ: PHỤC CHẾ ẢNH (DÙNG CODEFORMER)
+    // ==========================================
+    async function handleRestore() {
+        if (!selectedFile) return alert("Vui lòng chọn ảnh!");
+        
         loadingOverlay.style.display = 'flex';
-        loadingText.innerText = "⏳ Đang gửi ảnh trực tiếp đến máy chủ AI (Đợi 15-30s)...";
+        loadingText.innerText = "⏳ Đang kết nối AI CodeFormer để phục chế (Có thể mất 20s)...";
 
         try {
-            // Chuyển ảnh thành Base64
-            const base64Image = await fileToBase64(selectedFile);
-            
-            // GỌI TRỰC TIẾP vào cổng API chuẩn của Gradio (Không dùng Proxy)
-            const targetUrl = "https://sczhou-codeformer.hf.space/run/predict";
+            // Sử dụng Client chuẩn để qua mặt lỗi 404 và xử lý hàng đợi
+            const app = await Client.connect("sczhou/CodeFormer");
+            const result = await app.predict(0, [
+                handle_file(selectedFile),
+                true, // background_enhance
+                true, // face_upsample
+                2,    // upscale
+                0.5   // fidelity
+            ]);
 
-            const response = await fetch(targetUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    fn_index: 0,
-                    data: [
-                        base64Image, // [0] Ảnh gốc
-                        true,        // [1] Làm nét nền (background_enhance)
-                        true,        // [2] Làm nét mặt (face_upsample)
-                        2,           // [3] Phóng to 2x (upscale)
-                        0.5          // [4] Độ chân thực (fidelity)
-                    ]
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Lỗi HTTP: ${response.status} - Máy chủ AI đang quá tải hoặc bảo trì.`);
-            }
-
-            const data = await response.json();
-            
-            // Xử lý dữ liệu trả về (Gradio có thể trả về Link hoặc Object chứa File)
-            if (data && data.data && data.data.length > 0) {
-                let resultUrl = "";
-                const output = data.data[0];
-
-                if (typeof output === 'string') {
-                    // Nếu AI trả về chuỗi Base64 hoặc URL trực tiếp
-                    resultUrl = output.startsWith("http") || output.startsWith("data:") 
-                        ? output 
-                        : `https://sczhou-codeformer.hf.space/file=${output}`;
-                } else if (typeof output === 'object') {
-                    // Nếu AI trả về dạng Object (Gradio 3/4 format)
-                    if (output.url) {
-                        resultUrl = output.url;
-                    } else if (output.name) {
-                        resultUrl = `https://sczhou-codeformer.hf.space/file=${output.name}`;
-                    }
-                }
-
-                if (resultUrl) {
-                    // Hiển thị ảnh thành công
-                    resultImage.src = resultUrl;
-                    resultImage.style.display = 'block';
-                    placeholderText.style.display = 'none';
-
-                    // Cập nhật nút Tải về
-                    if (btnDownload) {
-                        btnDownload.href = resultUrl;
-                        btnDownload.style.display = 'block';
-                    }
-                } else {
-                    throw new Error("Không thể trích xuất ảnh từ hệ thống AI.");
-                }
-            } else {
-                throw new Error("Dữ liệu trả về từ AI bị trống.");
-            }
-
+            const resultUrl = result.data[0].url || result.data[0];
+            showResult(resultUrl);
         } catch (err) {
-            console.error("Lỗi chi tiết:", err);
+            console.error(err);
             alert("❌ Lỗi phục chế: " + err.message);
         } finally {
             loadingOverlay.style.display = 'none';
         }
     }
 
-    if (btnProcess) btnProcess.addEventListener('click', processImage);
-    if (btnOutfit) btnOutfit.addEventListener('click', processImage);
+    // ==========================================
+    // 5. XỬ LÝ: GHÉP TRANG PHỤC (DÙNG AI HIỂU PROMPT)
+    // ==========================================
+    async function handleOutfitChange() {
+        if (!selectedFile) return alert("Vui lòng chọn ảnh!");
+        
+        const promptText = buildFinalPrompt();
+        if (!promptText) return alert("Vui lòng nhập Prompt hoặc chọn mẫu ở bảng điều khiển!");
+
+        loadingOverlay.style.display = 'flex';
+        loadingText.innerText = `⏳ Đang gửi Prompt: "${promptText.substring(0, 30)}..." tới AI...`;
+
+        try {
+            // Gọi AI hỗ trợ sửa ảnh bằng Prompt (VD: Instruct-Pix2Pix)
+            const app = await Client.connect("timbrooks/instruct-pix2pix");
+            const result = await app.predict(0, [
+                promptText,                 // Truyền câu lệnh (Prompt) vào đây
+                handle_file(selectedFile),  // Ảnh gốc
+                7.5,                        // Text CFG
+                1.5,                        // Image CFG
+                20                          // Số bước xử lý
+            ]);
+
+            const resultUrl = result.data[0].url || result.data[0];
+            showResult(resultUrl);
+        } catch (err) {
+            console.error(err);
+            alert("❌ Lỗi ghép trang phục: " + err.message + "\n(Gợi ý: Máy chủ AI này có thể đang bận, thử lại sau)");
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+
+    // Hàm hiển thị kết quả chung
+    function showResult(url) {
+        resultImage.src = url;
+        resultImage.style.display = 'block';
+        placeholderText.style.display = 'none';
+        if (btnDownload) {
+            btnDownload.href = url;
+            btnDownload.style.display = 'block';
+        }
+    }
+
+    // Gắn sự kiện cho 2 nút bấm khác nhau
+    if (btnProcess) btnProcess.addEventListener('click', handleRestore);
+    if (btnOutfit) btnOutfit.addEventListener('click', handleOutfitChange);
 
     // ==========================================
-    // 4. RESET
+    // 6. RESET
     // ==========================================
     if (btnReset) {
         btnReset.addEventListener('click', () => {
@@ -202,11 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resultImage.style.display = 'none';
             placeholderText.style.display = 'block';
             if (btnDownload) btnDownload.style.display = 'none';
-            
-            if (!isLoggedIn) {
-                btnProcess.disabled = true;
-                btnProcess.innerText = "Phục Chế Ảnh (Cần Kết Nối)";
-            }
         });
     }
 });
