@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phục chế ảnh AI</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Thư viện Đăng nhập Google -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Script chính (sử dụng type="module" để import Gradio client) -->
-    <script type="module" src="script.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -24,17 +22,19 @@
 
             <!-- XÁC THỰC GOOGLE -->
             <div class="auth-section">
-                <label>Xác thực tài khoản Google:</label>
-                <button id="custom-google-btn">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
-                    Đăng nhập bằng Google
-                </button>
-                <div id="auth-status" class="status-box disconnected">
-                    🔴 Chưa kết nối Google
-                </div>
-            </div>
+				<label>Xác thực tài khoản Google:</label>
+    
+			<!-- Nút Google tùy chỉnh mới: Đẹp, đều và ăn khớp với giao diện -->
+				<button id="custom-google-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4285F4; background: transparent; color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: 0.2s;">
+				<img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 18px; height: 18px;">
+				Đăng nhập bằng Google
+				</button>
+    
+			<div id="auth-status" class="status-box disconnected">
+				🔴 Chưa kết nối Google
+			</div>
+	</div>
 
-            <!-- PROMPT & TÙY CHỌN -->
             <div class="form-group">
                 <label>Yêu cầu tùy chỉnh (Prompt):</label>
                 <textarea id="prompt-input" placeholder="VD: Phục chế ảnh thẻ, mặc áo sơ mi trắng, nền xanh dương"></textarea>
@@ -43,7 +43,7 @@
             <div class="preset-title">Hoặc chọn một mẫu có sẵn:</div>
             <div class="presets">
                 <label class="preset-item">
-                    <input type="radio" name="preset" value="Phục chế chất lượng cao, nét căng, giữ màu xám nguyên bản." checked> Phục chế chất lượng cao
+                    <input type="radio" name="preset" value="Phục chế chất lượng cao, nét căng, giữ màu xám nguyên bản."> Phục chế chất lượng cao
                 </label>
                 <label class="preset-item">
                     <input type="radio" name="preset" value="Phục chế chi tiết và tô màu tự nhiên cho bức ảnh cũ."> Phục chế & Tô màu
@@ -84,7 +84,7 @@
             </div>
 
             <button class="btn-yellow" id="btn-outfit">GHÉP TRANG PHỤC</button>
-            <button class="btn-purple" id="btn-process" disabled>Phục Chế Ảnh (Cần Đăng Nhập)</button>
+            <button class="btn-purple" id="btn-process" disabled>Phục Chế Ảnh (Cần Kết Nối)</button>
             <button class="btn-outline" id="btn-reset">Làm Lại Ảnh Mới</button>
         </div>
 
@@ -92,11 +92,10 @@
         <div class="display-box">
             <div class="box-header red">ẢNH GỐC</div>
             <div class="image-container" id="original-container">
-                <label for="file-input" class="upload-label" id="upload-label">
+                <label for="file-input" class="upload-label">
                     ➕ Nhấp vào đây để tải ảnh cũ lên
                 </label>
                 <input type="file" id="file-input" accept="image/*">
-                <img id="original-preview" alt="Xem trước ảnh gốc" style="display: none;">
             </div>
         </div>
 
@@ -104,16 +103,13 @@
         <div class="display-box">
             <div class="box-header yellow">ẢNH ĐÃ PHỤC CHẾ</div>
             <div class="image-container" id="result-container">
-                <span class="placeholder-text" id="placeholder-text">Vui lòng đăng nhập Google và tải ảnh lên để bắt đầu.</span>
-                <img id="result-image" alt="Ảnh kết quả" style="display: none;">
+                <span class="placeholder-text">Vui lòng đăng nhập Google và tải ảnh lên để bắt đầu.</span>
             </div>
             <div class="loading-overlay" id="loading">
                 <div class="spinner"></div>
-                <span id="loading-text">AI đang tiến hành phục chế...</span>
+                <span>AI đang tiến hành phục chế...</span>
             </div>
-            <a id="btn-download" class="btn-yellow" style="display: none; text-align: center; text-decoration: none; margin-top: 10px;" download="restored_photo.png">⬇️ Tải Ảnh Về Mát</a>
         </div>
     </div>
-
 </body>
 </html>
