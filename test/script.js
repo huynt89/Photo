@@ -1,7 +1,7 @@
 const GOOGLE_CLIENT_ID = "894418983821-fjoc610mc93qirdoq67i1ufktq9jboc4.apps.googleusercontent.com"; 
 
 // THAY ĐỔI 1: Cập nhật URL trỏ về Cloudflare Worker mới dành cho Hugging Face
-const WORKER_URL = 'https://hf-image-proxy.tuanhuycntt.workers.dev';
+const WORKER_URL = 'https://image-editor-api.tuanhuycntt.workers.dev';
 
 const fileInput = document.getElementById('file-input'); 
 const originalContainer = document.getElementById('original-container'); 
