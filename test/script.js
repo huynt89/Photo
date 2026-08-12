@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // 3. XỬ LÝ GỌI AI
+    // 3. XỬ LÝ GỌI AI (TRỰC TIẾP, KHÔNG QUA PROXY)
     // ==========================================
     async function processImage() {
         if (!selectedFile) {
@@ -110,43 +110,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         loadingOverlay.style.display = 'flex';
-        loadingText.innerText = "⏳ Đang kết nối AI (Máy chủ mất khoảng 20s để xử lý)...";
+        loadingText.innerText = "⏳ Đang gửi ảnh trực tiếp đến máy chủ AI (Đợi 15-30s)...";
 
         try {
+            // Chuyển ảnh thành Base64
             const base64Image = await fileToBase64(selectedFile);
-            const targetUrl = "https://sczhou-codeformer.hf.space/api/predict";
-            const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+            
+            // GỌI TRỰC TIẾP vào cổng API chuẩn của Gradio (Không dùng Proxy)
+            const targetUrl = "https://sczhou-codeformer.hf.space/run/predict";
 
-            const response = await fetch(proxyUrl, {
+            const response = await fetch(targetUrl, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
-                    data: [base64Image, true, true, 2, 0.5]
+                    fn_index: 0,
+                    data: [
+                        base64Image, // [0] Ảnh gốc
+                        true,        // [1] Làm nét nền (background_enhance)
+                        true,        // [2] Làm nét mặt (face_upsample)
+                        2,           // [3] Phóng to 2x (upscale)
+                        0.5          // [4] Độ chân thực (fidelity)
+                    ]
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`Lỗi HTTP: ${response.status}`);
+                throw new Error(`Lỗi HTTP: ${response.status} - Máy chủ AI đang quá tải hoặc bảo trì.`);
             }
 
             const data = await response.json();
             
-            if (data && data.data && data.data[0]) {
-                const resultUrl = data.data[0];
-                resultImage.src = resultUrl;
-                resultImage.style.display = 'block';
-                placeholderText.style.display = 'none';
+            // Xử lý dữ liệu trả về (Gradio có thể trả về Link hoặc Object chứa File)
+            if (data && data.data && data.data.length > 0) {
+                let resultUrl = "";
+                const output = data.data[0];
 
-                if (btnDownload) {
-                    btnDownload.href = resultUrl;
-                    btnDownload.style.display = 'block';
+                if (typeof output === 'string') {
+                    // Nếu AI trả về chuỗi Base64 hoặc URL trực tiếp
+                    resultUrl = output.startsWith("http") || output.startsWith("data:") 
+                        ? output 
+                        : `https://sczhou-codeformer.hf.space/file=${output}`;
+                } else if (typeof output === 'object') {
+                    // Nếu AI trả về dạng Object (Gradio 3/4 format)
+                    if (output.url) {
+                        resultUrl = output.url;
+                    } else if (output.name) {
+                        resultUrl = `https://sczhou-codeformer.hf.space/file=${output.name}`;
+                    }
+                }
+
+                if (resultUrl) {
+                    // Hiển thị ảnh thành công
+                    resultImage.src = resultUrl;
+                    resultImage.style.display = 'block';
+                    placeholderText.style.display = 'none';
+
+                    // Cập nhật nút Tải về
+                    if (btnDownload) {
+                        btnDownload.href = resultUrl;
+                        btnDownload.style.display = 'block';
+                    }
+                } else {
+                    throw new Error("Không thể trích xuất ảnh từ hệ thống AI.");
                 }
             } else {
-                throw new Error("Không nhận được dữ liệu ảnh trả về từ AI.");
+                throw new Error("Dữ liệu trả về từ AI bị trống.");
             }
 
         } catch (err) {
-            console.error("Lỗi:", err);
+            console.error("Lỗi chi tiết:", err);
             alert("❌ Lỗi phục chế: " + err.message);
         } finally {
             loadingOverlay.style.display = 'none';
